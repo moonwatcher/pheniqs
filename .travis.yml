@@ -11,8 +11,8 @@ env:
   matrix:
     secure: YxnJfyr2pyPqNSWPrsbWSnO9cvlw9rmt5NDoT/WafwfKJy+NSE1GEWXZy9b5dJcfajCcDeGlfZMTX19wnrL8jdX1pW8UO5sDdB2YOFLOBYX7vZLT2Gw//5mTEj46RqDWvb83ydwgg0hhXBJXs7ozzE7yNsqAjBJx6vp8QEGCVhiLJLmmMijkIq5AdxA6OJP/7oQwk3Wd8oOy7VXRd5FBIhvyFrNjd+S47Y/7wAZ+LaYa/4f3zmfDpKeEr1AOcZfTknL6T8YHaYa0dHArOa4tLJp13aH1g3KxTXDEsc4Hmn/RfkW2oi9YffbAF+03UGMhr1qBSoHqNRIM8OrW11JRke+fG3I32i81gxJBEYLs2EAqaJ8wPFMeivX5uqOMROnykSh0DrspvTltEYYbnwJ9wUNtz6Cflk9sUbPfq1Xxprm/Y/96igMp3Ahxw8WcwvhEvGMOONlOuX2W2VgfoUtW0/B+ih8mJ7g0t4j04V7y5tUryUyRY2NI1llAgx2uiOutWeRS+AMjOqvnq3oGgri/bQTAsCK7+IaUkuQCSW0E/EpcaLRxaCDbiU1UeJYbmvvUoL8NO1Y+LFnuJLr9P1d42Cf0JnTjo6hMnRg7CqHMnrbQFsh7NyZF3oe/xgLZCiz3Sdx4j4oSU+v6q0Jz1qyS4mkqqMZAC1ZyYXWVfqYCJQk=
 before_install:
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update > /dev/null 2>&1; brew upgrade
-  python > /dev/null 2>&1; fi
+# - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update > /dev/null 2>&1; brew upgrade
+#   python > /dev/null 2>&1; fi
 - eval "${MATRIX_EVAL}"
 install: true
 stages:
@@ -20,157 +20,130 @@ stages:
 - name: deploy
   if: branch = master
 script:
-- "./tool/pheniqs-build-api.py -v error build test/build.json"
-- make all PREFIX=${HOME}/.pheniqs/travis/install 2> >(./test/filter_warning.py)
+# - "./tool/pheniqs-build-api.py -v error build test/build.json"
+# - make all PREFIX=${HOME}/.pheniqs/travis/install 2> >(./test/filter_warning.py)
+- make
 - "./pheniqs --version"
 - make test
 jobs:
   fast_finish: true
-  allow_failures:
-  - env:
-    - MATRIX_EVAL="brew install gcc@7; brew link --overwrite gcc@7 && CC=gcc-7 &&
-      CXX=g++-7"
   include:
   - os: linux
+    name: gcc on Ubuntu
     stage: test
+    dist: focal
     addons:
       apt:
         sources:
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
-        - g++-4.8
+        - build-essential
+        - rapidjson-dev
+        - libhts-dev
+        - liblzma-dev
+        - libdeflate-dev
+        - libbz2-dev
     env:
-    - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
+    - MATRIX_EVAL="CC=gcc && CXX=g++"
   - os: linux
+    name: clang on Ubuntu
     stage: test
+    dist: focal
     addons:
       apt:
         sources:
-        - ubuntu-toolchain-r-test
+        - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
-        - g++-4.9
-    env:
-    - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-5
-    env:
-    - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-6
-    env:
-    - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        packages:
-        - g++-7
-    env:
-    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-3.6
-        packages:
-        - clang-3.6
-    env:
-    - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-3.7
-        packages:
-        - clang-3.7
-    env:
-    - MATRIX_EVAL="CC=clang-3.7 && CXX=clang++-3.7"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-3.8
-        packages:
-        - clang-3.8
-    env:
-    - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - llvm-toolchain-trusty-3.9
-        packages:
-        - clang-3.9
-    env:
-    - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
-  - os: linux
-    stage: test
-    addons:
-      apt:
-        sources:
-        - llvm-toolchain-trusty-4.0
-        packages:
-        - clang-4.0
-    env:
-    - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-  - os: osx
-    stage: test
-    osx_image: xcode8.3
+        - clang
+        - rapidjson-dev
+        - libhts-dev
+        - liblzma-dev
+        - libdeflate-dev
+        - libbz2-dev
     env:
     - MATRIX_EVAL="CC=clang && CXX=clang++"
   - os: osx
+    name: clang on MacOS
+    osx_image: xcode12
+    compiler: clang
     stage: test
-    osx_image: xcode8.3
+    addons:
+        homebrew:
+            packages:
+                - python
+                - zlib
+                - bzip2
+                - rapidjson
+                - xz
+                - htslib
+                - libdeflate
     env:
-    - MATRIX_EVAL="brew install gcc@4.9; brew link --overwrite gcc@4.9; CC=gcc-4.9
-      && CXX=g++-4.9"
+    - MATRIX_EVAL="CC=clang && CXX=clang++"
   - os: osx
+    name: gcc 9 on MacOS
+    osx_image: xcode12
     stage: test
-    osx_image: xcode8.3
+    addons:
+        homebrew:
+            packages:
+                - python
+                - gcc@9
+                - zlib
+                - bzip2
+                - rapidjson
+                - xz
+                - htslib
+                - libdeflate
+            update: true
     env:
-    - MATRIX_EVAL="brew install gcc@5; brew link --overwrite gcc@5; CC=gcc-5 && CXX=g++-5"
+    - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
   - os: osx
+    name: gcc 8 on MacOS
+    osx_image: xcode12
     stage: test
-    osx_image: xcode8.3
+    addons:
+        homebrew:
+            packages:
+                - python
+                - gcc@8
+                - zlib
+                - bzip2
+                - rapidjson
+                - xz
+                - htslib
+                - libdeflate
+            update: true
     env:
-    - MATRIX_EVAL="sudo softwareupdate -l;sudo softwareupdate -i 'Command Line Tools
-      (macOS High Sierra version 10.13) for Xcode-9.4'; brew install gcc@6; brew link
-      --overwrite gcc@6; CC=gcc-6 && CXX=g++-6"
+    - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
   - os: osx
+    name: gcc 7 on MacOS
+    osx_image: xcode12
     stage: test
-    osx_image: xcode8.3
+    addons:
+        homebrew:
+            packages:
+                - python
+                - gcc@7
+                - zlib
+                - bzip2
+                - rapidjson
+                - xz
+                - htslib
+                - libdeflate
+            update: true
     env:
-    - MATRIX_EVAL="sudo softwareupdate -l;sudo softwareupdate -i 'Command Line Tools
-      (macOS High Sierra version 10.13) for Xcode-9.4'; brew install gcc@7; brew link
-      --overwrite gcc@7; CC=gcc-7 && CXX=g++-7"
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
   - os: osx
+    name: Conda on MacOS
+    osx_image: xcode12
     stage: test
-    osx_image: xcode8.3
     script: bash $TRAVIS_BUILD_DIR/conda_recipe/osx_build.sh
   - os: linux
+    name: Conda on Ubuntu
+    dist: focal
     stage: test
     script: bash $TRAVIS_BUILD_DIR/conda_recipe/linux_build.sh
+
 # Commenting these out for now and just deploying all builds on the master branch
 #  - os: osx
 #    stage: deploy
